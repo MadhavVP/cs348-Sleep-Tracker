@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Welcome {{name}}!</h1>
+{% if not sleeps%}
+    <h2>Log some sleep to get started!</h2>
+    <form action="#" method="post">
+        <input type="hidden" name="form_name" value="log">
+        <p><input type="date" name="day" required/>   Date</p>
+        <p><input type="time" name="start" required/>   From</p>
+        <p><input type="time" name="end" required/>   To</p>
+        <p><input type="submit" value="Submit"/></p>
+    </form>
+{% else %}
+    <div style="display: flex; gap: 3rem;">
+        <div>
+            <h2>Log more sleep</h2>
+            <form action="#" method="post">
+            <input type="hidden" name="form_name" value="log">
+            <p><input type="date" name="day" required/>   Date</p>
+            <p><input type="time" name="start" required/>   From</p>
+            <p><input type="time" name="end" required/>   To</p>
+            <p><input type="submit" value="Submit"/></p>
+        </form>
+        </div>
+
+        <div>
+            <h2>Filter Entries</h2>
+            <form action="{{ url_for('filter') }}" method="post">
+            <input type="hidden" name="form_name" value="log">
+            <div style="display: flex; gap: 1rem;">
+                <p><input type="date" name="sday"/>   Start Day</p>
+                <p><input type="date" name="eday"/>   End Day</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <p><input type="time" name="start"/>   Start Time</p>
+                <p><input type="time" name="end"/>   End Time</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <p><input type="number" min="0" max="24" step="0.01" name="mindur"/>   Min Duration</p>
+                <p><input type="number" min="0" max="24" step="0.01" name="maxdur"/>   Max Duration</p>
+            </div>
+            <p><input type="submit" value="Filter"/></p>
+        </form>
+        </div>
+    </div>
+    <h2>Here's how you've been sleeping lately</h2>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Day</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Duration (hours)</th>
+        </tr>
+        {% for s in sleeps %}
+        <tr>
+            <td>{{ s.day.strftime("%Y-%m-%d") }}</td>
+            <td>{{ s.start.strftime("%H:%M") }}</td>
+            <td>{{ s.end.strftime("%H:%M") }}</td>
+            <td>{{ "%.2f"|format(s.duration) }}</td>
+            <td>
+                <form action="{{ url_for('edit', sleep_id=s.sid) }}" method="get" style="display:inline;">
+                    <button type="submit">Edit</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+{% endblock %}

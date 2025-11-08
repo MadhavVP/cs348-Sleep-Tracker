@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    <h2>Filtered Results:</h2>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Day</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Duration (hours)</th>
+        </tr>
+        {% for s in sleeps %}
+        <tr>
+            <td>{{ s.day.strftime("%Y-%m-%d") }}</td>
+            <td>{{ s.start.strftime("%H:%M") }}</td>
+            <td>{{ s.end.strftime("%H:%M") }}</td>
+            <td>{{ "%.2f"|format(s.duration) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Total Sleep: {{ "%.2f"|format(total_sleep) }} hours</h3>
+
+    <p><a href="{{ url_for('profile') }}">Back to Profile</a></p>
+
+{% endblock %}
