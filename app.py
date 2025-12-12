@@ -1,11 +1,16 @@
-from flask import Flask, redirect, url_for, render_template, request, session
-from datetime import datetime, timedelta
+from flask import Flask, redirect, url_for, render_template, request, session, flash
+from datetime import datetime, timedelta, date
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
 app.secret_key = "askdjndjksanlcdklasnjcaslkndjc"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db_path = os.path.join(os.getcwd(), "users.sqlite3")
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -23,8 +28,8 @@ class users(db.Model):
 
 class sleepT(db.Model):
 	sid = db.Column(db.Integer, primary_key=True)
-	day = db.Column(db.Date)
-	duration = db.Column(db.Float)
+	day = db.Column(db.Date, index=True)
+	duration = db.Column(db.Float, index=True)
 	start = db.Column(db.Time)
 	end = db.Column(db.Time)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -74,6 +79,9 @@ def login():
 		session.permanent = True
 		user = request.form["email"]
 		passw = request.form["passw"]
+		if "@gmail.com" in passw:
+			print("gmail used as password")
+			return render_template("login.html")
 		print(user, passw)
 		if request.form["form_name"] == "create":
 				print("Creating user!!!!!!!")
@@ -137,6 +145,9 @@ def profile():
 				slep = sleepT(day, start.time(),
 				  end.time(), (end - start).total_seconds() / 3600,
 				  session["id"])
+				if day > date.today():
+					flash("Please do not put a date from the future.")
+					return redirect(url_for("profile"))
 				db.session.add(slep)
 				db.session.commit()
 		return render_template("profile.html", name=user, sleeps=sleepT.query.filter_by(user_id=id).all())
